@@ -69,11 +69,11 @@ function collectInternalLinks($) {
 }
 
 
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 5; i++) {
   crawl();
 }
 setTimeout(() => {
   process.exit(0);
-},45000)
+},15000)
 
 
