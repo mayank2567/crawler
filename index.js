@@ -16,7 +16,7 @@ const crawl = async () => {
     proxyIP = json.split('-')[1]; 
     console.log("proxyIP ", proxyIP);
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       args: [
         `--proxy-server=${proxyIP}:8001`,
         `--ignore-certificate-errors`
