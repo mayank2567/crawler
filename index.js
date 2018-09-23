@@ -68,10 +68,12 @@ function collectInternalLinks($) {
   return pages;
 }
 
-setInterval(() => {
-  for (let i = 0; i < 15; i++) {
-    crawl();
-  }
-}, 31000);
+
+for (let i = 0; i < 10; i++) {
+  crawl();
+}
+setTimeout(() => {
+  process.exit(0);
+},45000)
 
 
