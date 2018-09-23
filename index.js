@@ -18,7 +18,7 @@ const crawl = async () => {
     proxyIP = json.split('-')[1]; 
     console.log("proxyIP ", proxyIP);
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       args: [
         `--proxy-server=${proxyIP}:8001`,
         `--ignore-certificate-errors`
@@ -26,15 +26,14 @@ const crawl = async () => {
     });
     const page = await browser.newPage();
     await page.goto('http://gndeclogin.blogspot.com/2018/01/guru-nanak-dev-engineering-college.html');
-    await page.screenshot({ path: 'example.png' });
     await page.waitFor(1000);
     let bodyHTML = await page.evaluate(() => document.body.innerHTML);
     const $ = cheerio.load(bodyHTML)
     let pages = collectInternalLinks($);
     pages.map(async (page) => {
+      const page = await browser.newPage();
       console.log("page ", page);
       await page.goto(page);
-      await browser.close();
     })
     await browser.close();
   } catch (err) {
