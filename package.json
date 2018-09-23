@@ -1,5 +1,5 @@
 {
-  "name": "crawler-test",
+  "name": "crawler",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "crawler": "^1.1.2"
+    "node-fetch": "^2.2.0",
+    "puppeteer": "^1.8.0"
   }
 }

@@ -1,50 +1,38 @@
-var Crawler = require("crawler");
-let count = 0;
-var c = new Crawler({
-    maxConnections : 10,
-    // This will be called for each crawled page
-    callback : function (error, res, done) {
-        if(error){
-            console.log(error);
-        }else{
-            var $ = res.$;
-            // $ is Cheerio by default
-            //a lean implementation of core jQuery designed specifically for the server
-            if($("title").text() != 'Amazon.com: Online Shopping for Electronics, Apparel, Computers, Books, DVDs & more')
-            console.log($("title").text());
+const puppeteer = require('puppeteer');
+const fetch = require('node-fetch');
+let proxyIP = '104.199.224.4';
+const crawl = async () => {
+  try {
+    var body = {
+      location: 'all',
+      pickVendor: 'gcp'
+    };
+    const res = await fetch('http://server.e3sfm2eh4k.us-east-1.elasticbeanstalk.com/getRandomDCSProxy', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const json = await res.json();
+    proxyIP = json.split('-')[1]; 
+    console.log("proxyIP ", proxyIP);
+    const browser = await puppeteer.launch({
+      headless: false,
+      args: [
+        `--proxy-server=${proxyIP}:8001`,
+        `--ignore-certificate-errors`
+      ]
+    });
+    const page = await browser.newPage();
+    await page.goto('http://gndeclogin.blogspot.com/2018/01/guru-nanak-dev-engineering-college.html');
+    await page.screenshot({ path: 'example.png' });
 
-            count ++;
- console.log( count);
+    await browser.close();
+  } catch (err) {
+    console.log("err ", err);
 
+  }
+}
 
-        }
-        done();
-    }
-});
- 
-// Queue just one URL, with default callback
-setInterval(function(){
-    
-    c.queue('http://www.amazon.com');
-},1);
- 
-// Queue a list of URLs
-// c.queue(['http://www.google.com/','http://www.yahoo.com']);
- 
-// Queue URLs with custom callbacks & parameters
-// c.queue([{
-//     uri: 'http://parishackers.org/',
-//     jQuery: false,
- 
-    // The global callback won't be called
-//     callback: function (error, res, done) {
-//         if(error){
-//             console.log(error);
-//         }else{
-//             console.log('Grabbed', res.body.length, 'bytes');
-//         }
-//         done();
-//     }
-// }]);
- 
-// Queue some HTML code directly without grabbing (mostly for tests)
+setInterval(() => {
+  crawl()
+},2000);
