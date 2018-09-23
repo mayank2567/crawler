@@ -67,6 +67,11 @@ function collectInternalLinks($) {
   console.log("Found " + pages.length + " relative links on page");
   return pages;
 }
-crawl();
+
+setInterval(() => {
+  for (let i = 0; i < 15; i++) {
+    crawl();
+  }
+}, 31000);
 
 
