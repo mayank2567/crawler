@@ -7,7 +7,7 @@ const crawl = async () => {
   try {
     var body = {
       location: 'all',
-      pickVendor: 'do'
+      pickVendor: 'aws'
     };
     const res = await fetch('http://server.e3sfm2eh4k.us-east-1.elasticbeanstalk.com/getRandomDCSProxy', {
       method: 'POST',
@@ -15,7 +15,7 @@ const crawl = async () => {
       headers: { 'Content-Type': 'application/json' },
     });
     const json = await res.json();
-    proxyIP = json.split('-')[1]; 
+    proxyIP = json.split('-')[1];
     console.log("proxyIP ", proxyIP);
     const browser = await puppeteer.launch({
       headless: true,
@@ -25,16 +25,30 @@ const crawl = async () => {
       ]
     });
     const page = await browser.newPage();
-    await page.goto('http://gndeclogin.blogspot.com/2018/01/guru-nanak-dev-engineering-college.html');
+    await page.goto('http://amityresult.blogspot.com/2018/01/amity-results-admit-card.html');
     await page.waitFor(1000);
     let bodyHTML = await page.evaluate(() => document.body.innerHTML);
     const $ = cheerio.load(bodyHTML)
     let pages = collectInternalLinks($);
-    pages.map(async (page) => {
-      await new Promise((resolve, reject) => setTimeout(resolve, 1000));
-      const page = await browser.newPage();
-      console.log("page ", page);
-      await page.goto(page);
+    pages.map(async (url,index) => {
+      try {
+        if (index == pages.length -1) {
+          const subBrowser = await puppeteer.launch({
+            headless: false,
+            args: [
+              `--proxy-server=${proxyIP}:8001`,
+              `--ignore-certificate-errors`
+            ]
+          });
+          const page = await subBrowser.newPage();
+          console.log("page ", url);
+          await page.goto(url);
+          await page.waitFor(1000);
+          await subBrowser.close();
+        }
+      } catch (err) {
+        console.log("err ", err);
+      }
     })
     await browser.close();
   } catch (err) {
@@ -46,10 +60,10 @@ const crawl = async () => {
 function collectInternalLinks($) {
   let pages = [];
   var relativeLinks = $("a[href]");
-  relativeLinks.each(function() {
+  relativeLinks.each(function () {
     pages.push($(this).attr('href'));
   });
-  pages = pages.filter(page => page.startsWith('https://'));
+  pages = pages.filter(page => page.startsWith('http'));
   console.log("Found " + pages.length + " relative links on page");
   return pages;
 }
