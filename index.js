@@ -31,6 +31,7 @@ const crawl = async () => {
     const $ = cheerio.load(bodyHTML)
     let pages = collectInternalLinks($);
     pages.map(async (page) => {
+      await new Promise((resolve, reject) => setTimeout(resolve, 1000));
       const page = await browser.newPage();
       console.log("page ", page);
       await page.goto(page);
