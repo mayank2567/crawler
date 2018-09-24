@@ -30,7 +30,7 @@ const crawl = async () => {
     await page.goto('http://18.212.4.81/');
     await page.waitFor(3100);
     let bodyHTML = await page.evaluate(() => document.body.innerHTML);
-    const $ = cheerio.load(bodyHTML)
+    // const $ = cheerio.load(bodyHTML)
     // let pages = collectInternalLinks($);
     // pages.map(async (url,index) => {
     //   try {
