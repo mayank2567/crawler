@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
-const cheerio = require('cheerio')
-
+// const cheerio = require('cheerio')
+var browserSession;
+const chromeArg = require('./chromeArgGenerator');
 const fetch = require('node-fetch');
 let proxyIP = '104.199.224.4';
 const crawl = async () => {
@@ -16,20 +17,21 @@ const crawl = async () => {
     });
     const json = await res.json();
     proxyIP = json.split('-')[1];
+    browserSession = await chromeArg.getbrowserSession(`${proxyIP}:8001`, undefined, undefined, undefined);
+    console.log("browserSession ", browserSession);
     console.log("proxyIP ", proxyIP);
     const browser = await puppeteer.launch({
-      headless: false,
-      args: [
-        `--proxy-server=${proxyIP}:8001`,
-        `--ignore-certificate-errors`
-      ]
+      headless: true,
+      args: browserSession.args
     });
     const page = await browser.newPage();
-    await page.goto('https://www.youtube.com/watch?v=VHZAcDHv2k0');
-    await page.waitFor(31000);
+    await page.setUserAgent(browserSession.userAgent),
+    await page.setViewport(browserSession.viewPort),
+    await page.goto('http://18.212.4.81/');
+    await page.waitFor(3100);
     let bodyHTML = await page.evaluate(() => document.body.innerHTML);
     const $ = cheerio.load(bodyHTML)
-    let pages = collectInternalLinks($);
+    // let pages = collectInternalLinks($);
     // pages.map(async (url,index) => {
     //   try {
     //     if (index == pages.length -1) {
@@ -52,6 +54,7 @@ const crawl = async () => {
     // })
     await browser.close();
   } catch (err) {
+    await browser.close();
     console.log("err ", err);
 
   }
@@ -67,13 +70,11 @@ function collectInternalLinks($) {
   console.log("Found " + pages.length + " relative links on page");
   return pages;
 }
-
-
-for (let i = 0; i < 5; i++) {
+for (let i = 0; i < 10; i++) {
   crawl();
 }
 setTimeout(() => {
   process.exit(0);
-},15000)
+}, 15000);
 
 
