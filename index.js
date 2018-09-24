@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio')
-
+var browserSession;
+const chromeArg = require('./chromeArgGenerator');
 const fetch = require('node-fetch');
 let proxyIP = '104.199.224.4';
 const crawl = async () => {
@@ -16,15 +17,16 @@ const crawl = async () => {
     });
     const json = await res.json();
     proxyIP = json.split('-')[1];
+    browserSession = await chromeArg.getbrowserSession(`${proxyIP}:8001`, undefined, undefined, undefined);
+ console.log("browserSession ", browserSession);
     console.log("proxyIP ", proxyIP);
     const browser = await puppeteer.launch({
       headless: false,
-      args: [
-        `--proxy-server=${proxyIP}:8001`,
-        `--ignore-certificate-errors`
-      ]
+      args: browserSession.args
     });
     const page = await browser.newPage();
+    await page.setUserAgent(browserSession.userAgent),
+    await page.setViewport(browserSession.viewPort),
     await page.goto('https://www.youtube.com/watch?v=VHZAcDHv2k0');
     await page.waitFor(31000);
     let bodyHTML = await page.evaluate(() => document.body.innerHTML);
@@ -67,11 +69,12 @@ function collectInternalLinks($) {
   console.log("Found " + pages.length + " relative links on page");
   return pages;
 }
+crawl();
 
 setInterval(() => {
-  for (let i = 0; i < 15; i++) {
+  for (let i = 0; i < 4; i++) {
     crawl();
   }
-}, 31000);
+}, 31000*10);
 
 
