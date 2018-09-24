@@ -18,7 +18,7 @@ const crawl = async () => {
     const json = await res.json();
     proxyIP = json.split('-')[1];
     browserSession = await chromeArg.getbrowserSession(`${proxyIP}:8001`, undefined, undefined, undefined);
- console.log("browserSession ", browserSession);
+    console.log("browserSession ", browserSession);
     console.log("proxyIP ", proxyIP);
     const browser = await puppeteer.launch({
       headless: false,
@@ -27,8 +27,8 @@ const crawl = async () => {
     const page = await browser.newPage();
     await page.setUserAgent(browserSession.userAgent),
     await page.setViewport(browserSession.viewPort),
-    await page.goto('https://www.youtube.com/watch?v=VHZAcDHv2k0');
-    await page.waitFor(31000);
+    await page.goto('http://18.212.4.81/');
+    await page.waitFor(3100);
     let bodyHTML = await page.evaluate(() => document.body.innerHTML);
     const $ = cheerio.load(bodyHTML)
     let pages = collectInternalLinks($);
@@ -70,11 +70,15 @@ function collectInternalLinks($) {
   return pages;
 }
 crawl();
-
+let hour = new Date().getHours();
 setInterval(() => {
   for (let i = 0; i < 4; i++) {
     crawl();
   }
-}, 31000*10);
+  console.log(60-new Date().getMinutes(), 'left');
+  if(hour != new Date().getHours()){
+    process.exit(0);
+  }
+}, 15000);
 
 
