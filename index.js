@@ -21,7 +21,7 @@ const crawl = async () => {
     console.log("browserSession ", browserSession);
     console.log("proxyIP ", proxyIP);
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       args: browserSession.args
     });
     const page = await browser.newPage();
@@ -54,6 +54,7 @@ const crawl = async () => {
     // })
     await browser.close();
   } catch (err) {
+    await browser.close();
     console.log("err ", err);
 
   }
@@ -69,16 +70,11 @@ function collectInternalLinks($) {
   console.log("Found " + pages.length + " relative links on page");
   return pages;
 }
-crawl();
-let hour = new Date().getHours();
-setInterval(() => {
-  for (let i = 0; i < 4; i++) {
-    crawl();
-  }
-  console.log(60-new Date().getMinutes(), 'left');
-  if(hour != new Date().getHours()){
-    process.exit(0);
-  }
+for (let i = 0; i < 10; i++) {
+  crawl();
+}
+setTimeout(() => {
+  process.exit(0);
 }, 15000);
 
 
