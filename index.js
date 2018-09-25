@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer');
-// const cheerio = require('cheerio')
+const cheerio = require('cheerio')
 var browserSession;
 const chromeArg = require('./chromeArgGenerator');
 const fetch = require('node-fetch');
@@ -25,11 +25,18 @@ const crawl = async () => {
       args: browserSession.args
     });
     const page = await browser.newPage();
-    await page.setUserAgent(browserSession.userAgent),
-    await page.setViewport(browserSession.viewPort),
-    await page.goto('http://18.212.4.81/');
-    await page.waitFor(3100);
-    let bodyHTML = await page.evaluate(() => document.body.innerHTML);
+    await page.setUserAgent(browserSession.userAgent);
+    await page.setViewport(browserSession.viewPort);
+    await page.goto('http://www.expertfitness.ml/', {waitUntil: 'networkidle2'});
+    // let bodyHTML = await page.evaluate(() => document.body.innerHTML);
+    const linkHandlers = await page.$x('//*[@class="chitikaAdBlock"]');
+    
+    if (linkHandlers.length > 0) {
+      for(let i=0;i<linkHandlers.length;i++)
+      await linkHandlers[i].click();
+    }
+    await page.waitFor(10000);
+    await new Promise((resolve) => setTimeout(()=> resolve()),10000)
     // const $ = cheerio.load(bodyHTML)
     // let pages = collectInternalLinks($);
     // pages.map(async (url,index) => {
@@ -54,7 +61,6 @@ const crawl = async () => {
     // })
     await browser.close();
   } catch (err) {
-    await browser.close();
     console.log("err ", err);
 
   }
@@ -70,11 +76,11 @@ function collectInternalLinks($) {
   console.log("Found " + pages.length + " relative links on page");
   return pages;
 }
-for (let i = 0; i < 10; i++) {
+for (let i = 0; i < 5; i++) {
   crawl();
 }
-setTimeout(() => {
-  process.exit(0);
-}, 15000);
+// setTimeout(() => {
+//   process.exit(0);
+// }, 30000);
 
 
